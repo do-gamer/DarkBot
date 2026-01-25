@@ -176,6 +176,62 @@ public class GuiManager implements Manager, GameScreenAPI {
         return guis.putUpdatable(key, pluginAPI.requireInstance(gui));
     }
 
+    /**
+     * Temporary helper to scan for a valid signature/index pair on a GUI instance.
+     *
+     * How to use:
+     * 1) Call from {@link #tick()} only when the GUI is visible (gui.address != 0).
+     * 2) Pick a narrow index range around the previous index (e.g. 250..320).
+     * 3) Try a likely method signature first (includeName=true), adjust if needed.
+     * 4) Watch logs for "signature match at index" and update the callMethodChecked index.
+     * 5) Remove the call + this helper after confirming the new index.
+     *
+     * Example:
+     * scanMethodSignature(targetedOffers, "23(2626)1016321600", 250, 320, false);
+     * scanMethodSignature(targetedOffers, "23(cleanup)(2626)1016321600", 250, 320, true);
+     * scanMethodSignature(targetedOffers, "23(handleClick)(2626)1016321600", 250, 320, true);
+     */
+    public void scanMethodSignature(Gui gui, String signature, int fromIndex, int toIndex, boolean includeName) {
+        if (gui == null || gui.address == 0 || !Main.API.hasCapability(Capability.DIRECT_CALL_METHOD)) return;
+
+        try {
+            Class<?> apiClass = Main.API.getClass();
+            java.lang.reflect.Field directField = null;
+
+            while (apiClass != null && directField == null) {
+                try {
+                    directField = apiClass.getDeclaredField("direct");
+                } catch (NoSuchFieldException ignored) {
+                    apiClass = apiClass.getSuperclass();
+                }
+            }
+
+            if (directField == null) {
+                System.out.println("[GuiManager] direct interaction field not found");
+                return;
+            }
+
+            directField.setAccessible(true);
+            Object direct = directField.get(Main.API);
+            if (direct == null) {
+                System.out.println("[GuiManager] direct interaction is null");
+                return;
+            }
+
+            java.lang.reflect.Method checker = direct.getClass().getMethod("checkMethodSignature", long.class, int.class, boolean.class, String.class);
+
+            for (int idx = fromIndex; idx <= toIndex; idx++) {
+                int result = (int) checker.invoke(direct, gui.address, idx, includeName, signature);
+                if (result == 1) {
+                    System.out.println("[GuiManager] signature match at index " + idx + ": " + signature);
+                }
+            }
+        } catch (Throwable e) {
+            System.out.println("[GuiManager] failed to scan method signature: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void install(BotInstaller botInstaller) {
         botInstaller.invalid.add(value -> {
@@ -211,7 +267,10 @@ public class GuiManager implements Manager, GameScreenAPI {
             // GuiCloser closes just once per restart, targeted & cmd center can appear after port jumps
             guiCloser.tick();
 
-            targetedOffers.show(false);
+            scanMethodSignature(targetedOffers, "23(2626)1016321600", 250, 320, false);
+            scanMethodSignature(targetedOffers, "23(cleanup)(2626)1016321600", 250, 320, true);
+            scanMethodSignature(targetedOffers, "23(handleClick)(2626)1016321600", 250, 320, true);
+            //targetedOffers.show(false);
             commandCenter.show(false);
         }
 
