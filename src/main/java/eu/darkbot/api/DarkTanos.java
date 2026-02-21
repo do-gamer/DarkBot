@@ -30,6 +30,8 @@ public class DarkTanos implements GameAPI.Window, GameAPI.Handler, GameAPI.Memor
     public native void mouseUp   (int x, int y);
     public native void mouseClick(int x, int y);
 
+    public native void postActions(long... actions);
+
     public native int     readInt    (long address);
     public native long    readLong   (long address);
     public native double  readDouble (long address);
