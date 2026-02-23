@@ -21,6 +21,8 @@ public class DarkTanos implements GameAPI.Window, GameAPI.Handler, GameAPI.Memor
     public native boolean isValid();
     public native long    getMemoryUsage();
     public native int     getVersion();
+    // Show red marker on the screen where the mouse cursor is, when enabled
+    public native void setCursorMarker(boolean enable);
 
     public native void keyClick  (int keyCode);
     public native void sendText  (String text);

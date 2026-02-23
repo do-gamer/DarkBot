@@ -58,6 +58,11 @@ public class TanosAdapter extends GameAPIImpl<
     }
 
     @Override
+    public void setCursorMarker(boolean enable) {
+        handler.setCursorMarker(enable);
+    }
+
+    @Override
     public void postActions(long... actions) {
         window.postActions(actions);
     }
