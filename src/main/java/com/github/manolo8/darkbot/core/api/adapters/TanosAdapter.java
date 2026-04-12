@@ -33,6 +33,7 @@ public class TanosAdapter extends GameAPIImpl<
                 Capability.LOGIN,
                 Capability.INITIALLY_SHOWN,
                 Capability.CREATE_WINDOW_THREAD,
+                Capability.ALL_KEYBINDS_SUPPORT,
                 Capability.DIRECT_ENTITY_SELECT,
                 Capability.DIRECT_MOVE_SHIP,
                 Capability.DIRECT_COLLECT_BOX,
