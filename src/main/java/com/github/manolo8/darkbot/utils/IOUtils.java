@@ -40,7 +40,7 @@ public class IOUtils {
         PushbackInputStream in = new PushbackInputStream(input, 2);
 
         byte[] header = new byte[2];
-        int count = in.readNBytes(header, 0, 2);
+        int count = in.read(header);
         if (count > 0) in.unread(header, 0, count);
 
         if (count == 2 && header[0] == (byte) 0x1f && header[1] == (byte) 0x8b) {
