@@ -39,11 +39,10 @@ public class IOUtils {
     public static InputStream unwrapGzip(InputStream input) throws IOException {
         PushbackInputStream in = new PushbackInputStream(input, 2);
 
-        byte[] header = new byte[2];
-        int count = in.read(header);
-        if (count > 0) in.unread(header, 0, count);
+        byte[] header = in.readNBytes(2);
+        in.unread(header);
 
-        if (count == 2 && header[0] == (byte) 0x1f && header[1] == (byte) 0x8b) {
+        if (header.length == 2 && header[0] == (byte) 0x1f && header[1] == (byte) 0x8b) {
             return new GZIPInputStream(in);
         }
         return in;
